@@ -2,7 +2,7 @@
 // Sky Hoffert
 // Web data structure implementations.
 // Created Jul-12-2021.
-// Last modified Jul-12-2021.
+// Last modified Jul-18-2021.
 //
 
 #include "web.hpp"
@@ -12,20 +12,20 @@
 ///////////////////////////////////////////////////////////////////////////////
 // WebNode implementations.
 
-WebNode::WebNode(int n_children) {
+WebNode::WebNode(int n_children, int value) {
     _n_children = n_children;
 
     _children = new WebNode*[_n_children];
 
     for (int i = 0; i < _n_children; ++i) {
-        printf("DEBUG:Creating child %d as nullptr.\n", i);
         _children[i] = nullptr;
     }
+
+    _value = value;
 }
 
 WebNode::~WebNode() {
     for (int i = 0; i < _n_children; ++i) {
-        printf("DEBUG:Deleting child %d.\n", i);
         if (_children[i] != nullptr) {
             delete _children[i];
             _children[i] = nullptr;
@@ -33,10 +33,46 @@ WebNode::~WebNode() {
     }
 }
 
-WebNode* WebNode::FirstChildWithAtMost(int v) {
-    // TODO(sky): implement.
+int WebNode::Insert(int v) {
+    for (int i = 0; i < _n_children; ++i) {
+        // If eventually there is an empty child, insert here.
+        if (_children[i] == nullptr) {
+            _children[i] = new WebNode(_n_children, v);
+            return 0;
+        }
+
+        // If value already exists, don't do anything.
+        if (_children[i]->Value() == v) { return 0; }
+
+        // If this child has a larger value, insert below this child.
+        if (_children[i]->Value() > v) {
+            return _children[i]->Insert(v);
+        }
+    }
+
+    // TODO(sky): if all children are less, rotation needed.
+
+    // Otherwise, return error.
+    return -1;
+}
+
+int WebNode::Remove(int v) {
+    // TODO(sky): implement
+    return -1;
+}
+
+WebNode* WebNode::ChildTowardsValue(int v) {
+    for (int i = 0; i < _n_children; ++i) {
+        if (_children[i] == nullptr) { continue; }
+        if (_children[i]->Value() >= v) {
+            return _children[i];
+        }
+    }
+
     return nullptr;
 }
+
+int WebNode::Value() { return _value; }
 
 // WebNode implementations.
 ///////////////////////////////////////////////////////////////////////////////
@@ -57,20 +93,36 @@ Web::~Web() {
 }
 
 int Web::Insert(int v) {
-    // TODO(sky): implement with WebNode methods. First find.
-    return -1;
+    if (_root == nullptr) {
+        _root = new WebNode(_n_children, v);
+        return 0;
+    }
+
+    return _root->Insert(v);
 }
 
 int Web::Remove(int v) {
-    // TODO(sky): implement with WebNode methods. First find.
-    return -1;
+    return _root->Remove(v);
 }
 
-int Web::Find(int v) {
-    // TODO(sky): use this method.
-    _root->FirstChildWithAtMost(v);
+WebNode* Web::Find(int v) {
+    if (_root == nullptr) { return nullptr; }
 
-    return -1;
+    if (_root->Value() == v) { return _root; }
+
+    WebNode* node = _root;
+    
+    while (node != nullptr) {
+        node = node->ChildTowardsValue(v);
+        if (node == nullptr) { break; }
+        if (node->Value() == v) { return node; }
+    }
+
+    return nullptr;
+}
+
+bool Web::Contains(int v) {
+    return Find(v) != nullptr;
 }
 
 int Web::Size() { return _size; }

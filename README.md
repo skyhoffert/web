@@ -1,16 +1,10 @@
 # web
 Web data structure - similar to tree and graph.
 
-## Example
+## Orientation
 
-TODO(sky): describe?
+Children are oriented so that all children have value less than a parent node.
 
-        [1]
-         /\
-         ||
-         ||
-[x]<====[0]====>[2]
-         ||
-         ||
-         \/
-        [3]
+## Notes
+
+Duplicates are not allowed as of now.
